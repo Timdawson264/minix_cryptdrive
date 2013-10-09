@@ -6,4 +6,4 @@ cat cryptdrive.tar | tar -xf - ;
 
 cat cryptdrive.tar | tar -tf - | grep '\./.' | while read x; do chown bin:0 $x; done;
 
-rm cryptdrive.tar.gz;
+rm cryptdrive.tar;

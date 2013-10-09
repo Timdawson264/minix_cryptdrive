@@ -16,7 +16,7 @@ CFLAGS = -I$i
 LDFLAGS = -i
 LIBS = -lsys -lsysutil
 
-OBJ = memory.o
+OBJ = cryptdrive.o
 LIBDRIVER = $d/libdriver/driver.o
 
 
