@@ -41,7 +41,7 @@ PRIVATE struct driver u_dtab = {
 };
 
 /*#define SECTOR_SIZE 512*/
-//#define UPPERFS_SIZE 4096*20
+#define UPPERFS_SIZE 4096*20
 
 PRIVATE struct device dv;
 
@@ -92,7 +92,7 @@ unsigned nr_req;		/* length of request vector                 */
 	vir_bytes user_vir = iov->iov_addr; /*User program mem addresss*/
 	unsigned count = iov->iov_size; /* number of byted to copy */
 	
-	//printf("UPPER: Size:%d , DST:%d , POS:%d \n",count,user_vir,position);
+	printf("UPPER: Size:%d , DST:%d , POS:%d \n",count,user_vir,position);
 
 	if (position >= UPPERFS_SIZE) return(OK);        /* check for EOF */
 	if (position + count > UPPERFS_SIZE) count = UPPERFS_SIZE - position; /* boundy read/write */
