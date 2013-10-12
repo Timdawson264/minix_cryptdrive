@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#define MAJOR 23
+#define CD_MAJOR 23
 
 int device_caller=0; /*pid of caller*/
 int thispid;
@@ -48,6 +48,7 @@ PUBLIC void driver_task(void)
 			mess.m_source = thispid; /*make this the source*/
 			send(DRVR_PROC_NR,&mess);
 		}
+	}
 }
 
 
@@ -56,8 +57,8 @@ PUBLIC int main(void){
 	/* create nodes */
 	thispid=getpid();
 	printf("CryptDrive Started with pid %d\n",thispid);
-	mapdriver(MAJOR, thispid , STYLE_DEV);
+	mapdriver(CD_MAJOR, thispid , STYLE_DEV);
 	driver_task();
-	unmapdriver(MAJOR);		
+	unmapdriver(CD_MAJOR);		
 	return(OK);				
 }
