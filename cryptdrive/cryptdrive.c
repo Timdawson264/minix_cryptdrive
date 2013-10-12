@@ -37,7 +37,7 @@ PUBLIC void driver_task(void)
 		
 		if(DRVR_PROC_NR==mess.m_source){
 			/*from disk driver*/
-			mess.m_source = device_caller;
+			mess.m_source = thispid; /* make it from here */
 			send(device_caller, &mess);
 		}else{
 			/* prob from fs */
