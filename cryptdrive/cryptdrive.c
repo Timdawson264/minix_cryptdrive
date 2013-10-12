@@ -31,7 +31,7 @@ PUBLIC void driver_task(void)
 	
 		device_caller = mess.m_source;
         proc_nr = mess.PROC_NR;
-		printf("CD: message from %d, proc_nr\n",device_caller,proc_nr);
+		printf("CD: message from %d, %d\n",device_caller,proc_nr);
 		/* Now carry out the work. */
 		
 		if(DRVR_PROC_NR==mess.m_source){
@@ -58,14 +58,11 @@ PUBLIC void driver_task(void)
 					mess.m_source = thispid; /*make this the source*/
 					send(DRVR_PROC_NR,&mess);
 
-
-
-
 				case HARD_INT:
 				case SYS_SIG:
 				case SYN_ALARM:	continue;	/* don't reply */
-							
-			
+				
+			}
 		}
 	}
 }
