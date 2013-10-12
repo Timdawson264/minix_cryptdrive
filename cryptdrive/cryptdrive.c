@@ -8,7 +8,7 @@
 FORWARD _PROTOTYPE( int do_rdwt, (struct driver *dr, message *mp) );
 FORWARD _PROTOTYPE( int do_vrdwt, (struct driver *dr, message *mp) );
 
-int device_caller; //pid of caller
+int device_caller; /*pid of caller*/
 
 PUBLIC int main(void)
 {
