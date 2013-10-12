@@ -17,18 +17,12 @@ LDFLAGS = -i
 LIBS = -lsys -lsysutil
 
 OBJ = cryptdrive.o
-LIBDRIVER = $d/libdriver/driver.o
-
 
 # build local binary
 all build:	$(DRIVER)
-$(DRIVER):	$(OBJ) $(LIBDRIVER)
-	$(CC) -o $@ $(LDFLAGS) $(OBJ) $(LIBDRIVER) $(LIBS)
+$(DRIVER):	$(OBJ)
+	$(CC) -o $@ $(LDFLAGS) $(OBJ) $(LIBS)
 	install -S 1024w $(DRIVER)
-
-$(LIBDRIVER): 
-	cd $d/libdriver && $(MAKE) 
-
 
 # install with other drivers
 install:	/usr/sbin/$(DRIVER)
@@ -41,7 +35,7 @@ clean:
 
 
 depend: 
-	/usr/bin/mkdep "$(CC) -E $(CPPFLAGS)" *.c ../libdriver/*.c > .depend
+	/usr/bin/mkdep "$(CC) -E $(CPPFLAGS)" *.c > .depend
 
 # Include generated dependencies.
 include .depend
