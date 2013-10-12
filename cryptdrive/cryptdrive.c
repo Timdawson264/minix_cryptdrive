@@ -32,16 +32,18 @@ PUBLIC void driver_task(void)
 		device_caller = mess.m_source;
         proc_nr = mess.PROC_NR;
         
-		printf("CD: message from %u, %u\n",device_caller,proc_nr);
+		printf("CD: message from %u,\n",device_caller,proc_nr);
 		/* Now carry out the work. */
 		
 		if(DRVR_PROC_NR==mess.m_source){
-			/*from disk driver*/
+			/*from disk driver to other*/
 			mess.m_source = thispid; /* make it from here */
-			send(device_caller, &mess);
+			if(OK != send(device_caller, &mess))
+				panic("Message not sent back");
+				printf("CD: message to %u\n",device_caller);
 		}else{
 			/* prob from fs */
-			/*proxy some message to at_wini*/
+			/*from other to diskdriver*/
 			
 			switch(mess.m_type) {
 				case DEV_OPEN:		
@@ -57,7 +59,17 @@ PUBLIC void driver_task(void)
 				
 					device_caller = mess.m_source;
 					mess.m_source = thispid; /*make this the source*/
-					send(DRVR_PROC_NR,&mess);
+					if(OK != send(DRVR_PROC_NR, &mess))
+						panic("Message not sent back");
+					printf("CD: waiting for diskdriver\n");	
+					
+					if(receive(DRVR_PROC_NR, &mess) != OK) continue;
+					/*from disk driver to other*/
+					mess.m_source = thispid; /* make it from here */
+					if(OK != send(device_caller, &mess))
+						panic("Message not sent back");
+					printf("CD: message to %u\n",device_caller);
+					
 
 				case HARD_INT:
 				case SYS_SIG:
