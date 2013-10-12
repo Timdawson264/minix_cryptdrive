@@ -5,9 +5,6 @@
 
 #define major 23
 
-FORWARD _PROTOTYPE( int do_rdwt, (struct driver *dr, message *mp) );
-FORWARD _PROTOTYPE( int do_vrdwt, (struct driver *dr, message *mp) );
-
 int device_caller; /*pid of caller*/
 int thispid;
 
@@ -50,14 +47,14 @@ PUBLIC void driver_task(void)
 			default: 
 				/*proxy message to at_wini*/
 				mess.m_source = thispid; /*make this the source*/
-				send(DRVR_PROC_NR,&mess)
+				send(DRVR_PROC_NR,&mess);
 		}
 		
 		r = EDONTREPLY;
 		/* Finally, prepare and send the reply message. */
 		if (r != EDONTREPLY) {
 			mess.m_type = TASK_REPLY;
-			mess.REP_PROC_NR = proc_nr;
+			mess.REP_PROC_NR = device_caller;
 			/* Status is # of bytes transferred or error code. */
 			mess.REP_STATUS = r;	
 			send(device_caller, &mess);
