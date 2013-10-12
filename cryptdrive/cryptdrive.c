@@ -9,7 +9,7 @@ FORWARD _PROTOTYPE( int do_rdwt, (struct driver *dr, message *mp) );
 FORWARD _PROTOTYPE( int do_vrdwt, (struct driver *dr, message *mp) );
 
 int device_caller; /*pid of caller*/
-int thispid = device_caller
+int thispid;
 
 
 
@@ -42,17 +42,17 @@ PUBLIC void driver_task(void)
 			case DEV_GATHER: 
 			case DEV_SCATTER: 
 			*/
-
+			
 			case TASK_REPLY:/* relay  task reply back to caller */
 				mess.REP_PROC_NR = thispid;
 				send(device_caller, &mess);
-			
+				 break;
 			default: 
 				/*proxy message to at_wini*/
 				mess.m_source = thispid; /*make this the source*/
 				send(DRVR_PROC_NR,&mess)
 		}
-
+		
 		r = EDONTREPLY;
 		/* Finally, prepare and send the reply message. */
 		if (r != EDONTREPLY) {
