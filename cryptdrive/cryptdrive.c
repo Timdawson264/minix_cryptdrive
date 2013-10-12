@@ -18,7 +18,7 @@ PUBLIC void driver_task(void)
 {
 	/* Main program of any device driver task. */
 
-	int r;
+	int r,s;
 	message mess;
 
 	/* Here is the main loop of the disk task.  It waits for a message, carries
@@ -39,7 +39,7 @@ PUBLIC void driver_task(void)
 			/*from disk driver to other*/
 			mess.m_source = thispid; /* make it from here */
 			if(OK != send(device_caller, &mess))
-				panic("Message not sent back");
+				panic("CryptDrive","1 Message not sent back",s);
 				printf("CD: message to %u\n",device_caller);
 		}else{
 			/* prob from fs */
@@ -60,14 +60,14 @@ PUBLIC void driver_task(void)
 					device_caller = mess.m_source;
 					mess.m_source = thispid; /*make this the source*/
 					if(OK != send(DRVR_PROC_NR, &mess))
-						panic("Message not sent back");
+						panic("CryptDrive","2 Message not sent back",s);
 					printf("CD: waiting for diskdriver\n");	
 					
 					if(receive(DRVR_PROC_NR, &mess) != OK) continue;
 					/*from disk driver to other*/
 					mess.m_source = thispid; /* make it from here */
 					if(OK != send(device_caller, &mess))
-						panic("Message not sent back");
+						panic("CryptDrive","3 Message not sent back",s);
 					printf("CD: message to %u\n",device_caller);
 					
 
