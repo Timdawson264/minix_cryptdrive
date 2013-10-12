@@ -9,7 +9,7 @@ FORWARD _PROTOTYPE( int do_rdwt, (struct driver *dr, message *mp) );
 FORWARD _PROTOTYPE( int do_vrdwt, (struct driver *dr, message *mp) );
 
 int device_caller; /*pid of caller*/
-
+int thispid = device_caller
 
 
 
@@ -20,7 +20,7 @@ PUBLIC void driver_task(void)
 {
 	/* Main program of any device driver task. */
 
-	int r, proc_nr;
+	int r;
 	message mess;
 
 	/* Here is the main loop of the disk task.  It waits for a message, carries
@@ -32,7 +32,6 @@ PUBLIC void driver_task(void)
 		if(receive(ANY, &mess) != OK) continue;
 
 		device_caller = mess.m_source;
-		proc_nr = mess.PROC_NR;
 
 		/* Now carry out the work. */
 		switch(mess.m_type) {
@@ -44,14 +43,14 @@ PUBLIC void driver_task(void)
 			case DEV_SCATTER: 
 			*/
 
-			case TASK_REPLY:/* relay reply back to caller */
-				mess.REP_PROC_NR = proc_nr;
+			case TASK_REPLY:/* relay  task reply back to caller */
+				mess.REP_PROC_NR = thispid;
 				send(device_caller, &mess);
-
+			
 			default: 
 				/*proxy message to at_wini*/
-				mess.m_source = mess.PROC_NR; /*make this the source*/
-				mess.PROC_NR = DRVR_PROC_NR	/* make at_wini the destination */
+				mess.m_source = thispid; /*make this the source*/
+				send(DRVR_PROC_NR,&mess)
 		}
 
 		r = EDONTREPLY;
@@ -71,8 +70,8 @@ PUBLIC int main(void)
 {
 /* Main program. Initialize the memory driver and start the main loop. */
 	/* create nodes */
-
-	mapdriver(major, getpid() , STYLE_DEV);
+	thispid=getpid();
+	mapdriver(major, thispid , STYLE_DEV);
 	driver_task();
 	unmapdriver(major);		
 	return(OK);				
