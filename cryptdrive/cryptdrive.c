@@ -10,14 +10,7 @@ FORWARD _PROTOTYPE( int do_vrdwt, (struct driver *dr, message *mp) );
 
 int device_caller; /*pid of caller*/
 
-PUBLIC int main(void)
-{
-/* Main program. Initialize the memory driver and start the main loop. */
-  mapdriver(major, getpid() , STYLE_DEV);
-  driver_task();
-  unmapdriver(major);		
-  return(OK);				
-}
+
 
 
 /*===========================================================================*
@@ -55,7 +48,7 @@ PUBLIC void driver_task(void)
 		mess.REP_PROC_NR = proc_nr;
 		send(device_caller, &mess);
 		
-	case default: 
+	default: 
 		/*proxy message to at_wini*/
 		mess.m_source = mess.PROC_NR; /*make this the source*/
 		mess.PROC_NR = DRVR_PROC_NR	/* make at_wini the destination */
@@ -72,4 +65,16 @@ PUBLIC void driver_task(void)
 		send(device_caller, &mess);
 	}
   }
+}
+
+
+PUBLIC int main(void)
+{
+/* Main program. Initialize the memory driver and start the main loop. */
+	/* create nodes */
+
+	mapdriver(major, getpid() , STYLE_DEV);
+	driver_task();
+	unmapdriver(major);		
+	return(OK);				
 }
