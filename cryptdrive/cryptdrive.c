@@ -4,9 +4,9 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#define major 23
+#define MAJOR 23
 
-int device_caller; /*pid of caller*/
+int device_caller=0; /*pid of caller*/
 int thispid;
 
 
@@ -27,40 +27,27 @@ PUBLIC void driver_task(void)
 	while (TRUE) {
 
 		/* Wait for a request to read or write a disk block. */
-		if(receive(ANY, &mess) != OK) continue;
+		if(device_caller==0)
+			if(receive(ANY, &mess) != OK) continue;
+		else
+			if(receive(DRVR_PROC_NR, &mess) != OK) continue;
 	
-		device_caller = mess.m_source;
+		
 		printf("CD: message from %d\n",device_caller);
 		/* Now carry out the work. */
-		switch(mess.m_type) {
-
-			/*
-			case DEV_READ:	
-			case DEV_WRITE:	 
-			case DEV_GATHER: 
-			case DEV_SCATTER: 
-			*/
-			
-			case TASK_REPLY:/* relay  task reply back to caller */
-				mess.REP_PROC_NR = thispid;
-				send(device_caller, &mess);
-				 break;
-			default: 
-				/*proxy message to at_wini*/
-				mess.m_source = thispid; /*make this the source*/
-				send(DRVR_PROC_NR,&mess);
-		}
 		
-		r = EDONTREPLY;
-		/* Finally, prepare and send the reply message. */
-		if (r != EDONTREPLY) {
-			mess.m_type = TASK_REPLY;
-			mess.REP_PROC_NR = device_caller;
-			/* Status is # of bytes transferred or error code. */
-			mess.REP_STATUS = r;	
+		if(DRVR_PROC_NR==mess.m_source){
+			/*from disk driver*/
+			mess.REP_PROC_NR = thispid;
 			send(device_caller, &mess);
+			device_caller = 0;
+		}else{
+			/* prob from fs */
+			/*proxy message to at_wini*/
+			device_caller = mess.m_source;
+			mess.m_source = thispid; /*make this the source*/
+			send(DRVR_PROC_NR,&mess);
 		}
-	}
 }
 
 
@@ -69,8 +56,8 @@ PUBLIC int main(void){
 	/* create nodes */
 	thispid=getpid();
 	printf("CryptDrive Started with pid %d\n",thispid);
-	mapdriver(major, thispid , STYLE_DEV);
+	mapdriver(MAJOR, thispid , STYLE_DEV);
 	driver_task();
-	unmapdriver(major);		
+	unmapdriver(MAJOR);		
 	return(OK);				
 }
