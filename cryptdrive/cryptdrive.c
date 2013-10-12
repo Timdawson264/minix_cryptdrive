@@ -27,10 +27,7 @@ PUBLIC void driver_task(void)
 	while (TRUE) {
 
 		/* Wait for a request to read or write a disk block. */
-		if(device_caller==0)
-			if(receive(ANY, &mess) != OK) continue;
-		else
-			if(receive(DRVR_PROC_NR, &mess) != OK) continue;
+		if(receive(ANY, &mess) != OK) continue;
 	
 		
 		printf("CD: message from %d\n",device_caller);
