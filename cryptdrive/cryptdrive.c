@@ -30,7 +30,7 @@ PUBLIC void driver_task(void)
 		if(receive(ANY, &mess) != OK) continue;
 	
 		device_caller = mess.m_source;
-		fprintf("CD: message from %d\n",device_caller);
+		printf("CD: message from %d\n",device_caller);
 		/* Now carry out the work. */
 		switch(mess.m_type) {
 
