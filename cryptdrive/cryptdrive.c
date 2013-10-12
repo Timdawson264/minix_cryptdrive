@@ -2,6 +2,7 @@
 #include <sys/ioc_disk.h>
 #include <minix/com.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #define major 23
 
@@ -27,9 +28,9 @@ PUBLIC void driver_task(void)
 
 		/* Wait for a request to read or write a disk block. */
 		if(receive(ANY, &mess) != OK) continue;
-
+	
 		device_caller = mess.m_source;
-
+		fprintf("CD: message from %d\n",device_caller);
 		/* Now carry out the work. */
 		switch(mess.m_type) {
 
@@ -63,11 +64,11 @@ PUBLIC void driver_task(void)
 }
 
 
-PUBLIC int main(void)
-{
+PUBLIC int main(void){
 /* Main program. Initialize the memory driver and start the main loop. */
 	/* create nodes */
 	thispid=getpid();
+	printf("CryptDrive Started with pid %d\n",thispid);
 	mapdriver(major, thispid , STYLE_DEV);
 	driver_task();
 	unmapdriver(major);		
