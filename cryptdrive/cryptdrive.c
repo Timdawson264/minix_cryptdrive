@@ -22,7 +22,7 @@ message *mp;			/* pointer to read or write message */
 	iovec_t iovec1;
 	int r, opcode;
 	phys_bytes phys_addr;
-	
+	vir_bytes user_vir;
 	/* Disk address?  Address and length of the user buffer? */
 	if (mp->COUNT < 0) return(EINVAL);
 
@@ -35,7 +35,7 @@ message *mp;			/* pointer to read or write message */
 		
 	if(opcode == DEV_READ){
 		/*from here to caller*/
-		vir_bytes user_vir = (vir_bytes) mp->ADDRESS;
+		user_vir = (vir_bytes) mp->ADDRESS;
 		mp->ADDRESS = (vir_bytes) buffer; /* use my buffer */
 		mp->m_source=thispid;
 	
@@ -54,7 +54,7 @@ message *mp;			/* pointer to read or write message */
 		/*from caller to here*/
 		sys_vircopy(device_caller, D, mp->ADDRESS, SELF, D, buffer, mp->COUNT);
 		
-		vir_bytes user_vir = mp->ADDRESS;
+		user_vir = mp->ADDRESS;
 		mp->ADDRESS=buffer; /* use my buffer */
 		mp->m_source=thispid;
 	
