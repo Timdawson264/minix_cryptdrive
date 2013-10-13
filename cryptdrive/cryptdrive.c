@@ -1,6 +1,5 @@
 #include "rijndael-api-fst.h"
 #include "../drivers.h"
-#include "../libdriver/driver.h"
 #include <minix/com.h>
 #include <minix/const.h>
 #include <minix/config.h>
@@ -159,25 +158,22 @@ PRIVATE int do_vrdwt(message* mp)
         iov->iov_addr += count;
         if ((iov->iov_size -= count) == 0) { iov++; nr_req--; } /* vector done; next request */
 	}
-	
-		mess.m_type = TASK_REPLY;
-		mess.REP_PROC_NR = proc_nr;
-		/* Status is ok */
-		mess.REP_STATUS = OK;	
-		send(device_caller, &mess);
 
-	/* Copy the I/O vector back to the caller. */
-	if (mp->m_source >= 0) {
-		sys_datacopy(SELF, (vir_bytes) iovec, 
-			mp->m_source, (vir_bytes) mp->ADDRESS, iovec_size);
-	}
-  
-  
-  
-  
-  
-  
-  return(r);
+
+		/* Copy the I/O vector back to the caller. */
+		if (mp->m_source >= 0) {
+			sys_datacopy(SELF, (vir_bytes) iovec, 
+				mp->m_source, (vir_bytes) mp->ADDRESS, iovec_size);
+		}
+	
+		mp->m_type = TASK_REPLY;
+		mp->REP_PROC_NR = proc_nr;
+		mp->m_source=thispid;
+		/* Status is ok */
+		mp->REP_STATUS = OK;	
+		send(device_caller, mp);
+		
+		return(OK)
 }
 
 /*===========================================================================*
@@ -260,7 +256,7 @@ void encryptBuffer(char* buffer,int bufferSize){
     return;
   }
   /*Setting the key direction to Enpcrypt*/
-  keyInst->Direction = DIR_ENCRYPT;
+  keyInst.Direction = DIR_ENCRYPT;
   makeKey(&keyInst, direction, 128,keyMaterial);
   cipherInit(&cipherInst, MODE_ECB, NULL);
   /*Encrypt the buffer*/
@@ -283,7 +279,7 @@ void decryptBuffer(char* buffer,int bufferSize){
     return;
   }
   /*Setting the key direction to Depcrypt*/
-  keyInst->Direction = DIR_DECRYPT;
+  keyInst.Direction = DIR_DECRYPT;
   makeKey(&keyInst, direction, 128,keyMaterial);
   cipherInit(&cipherInst, MODE_ECB, NULL);
   /*Decrypt the buffer*/
