@@ -8,7 +8,7 @@
 #define BUF_LEN 4096
 
 int device_caller=0,proc_nr=0; /*pid of caller*/
-int thispid;
+int thispid,s;
 
 char * buffer[BUF_LEN];
 
@@ -36,8 +36,8 @@ message *mp;			/* pointer to read or write message */
 		
 	if(opcode == DEV_READ){
 		/*from here to caller*/
-		caller_buf = mp->ADDRESS;
-		mp->ADDRESS=buffer; /* use my buffer */
+		caller_buf = (vir_bytes) mp->ADDRESS;
+		mp->ADDRESS= (vir_bytes) buffer; /* use my buffer */
 		mp->m_source=thispid;
 	
 		if(OK != sendrec(DRVR_PROC_NR, mp))
@@ -124,7 +124,7 @@ PUBLIC void driver_task(void)
 {
 	/* Main program of any device driver task. */
 
-	int r,s;
+	int r;
 	message mess;
 
 	/* Here is the main loop of the disk task.  It waits for a message, carries
