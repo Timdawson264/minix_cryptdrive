@@ -101,7 +101,7 @@ PRIVATE int do_vrdwt(message* mp)
   int r;
   message m_dd; /*message for disk driver*/
   nr_req = mp->COUNT;	/* Length of I/O vector */
-  off_t position = mp->POSITION;
+  unsigned int position = mp->POSITION;
   
 	if (mp->m_source < 0) {
 		/* Called by a task, no need to copy vector. */
@@ -261,7 +261,7 @@ void encryptBuffer(char* buffer,int bufferSize){
   }
   /*Setting the key direction to Enpcrypt*/
   keyInst->Direction = DIR_ENCRYPT;
-  makeKey(&keyInst, direction, 128,keyMaterial)
+  makeKey(&keyInst, direction, 128,keyMaterial);
   cipherInit(&cipherInst, MODE_ECB, NULL);
   /*Encrypt the buffer*/
   for(i = 0; i< bufferSize; i+=16) {
@@ -284,7 +284,7 @@ void decryptBuffer(char* buffer,int bufferSize){
   }
   /*Setting the key direction to Depcrypt*/
   keyInst->Direction = DIR_DECRYPT;
-  makeKey(&keyInst, direction, 128,keyMaterial)
+  makeKey(&keyInst, direction, 128,keyMaterial);
   cipherInit(&cipherInst, MODE_ECB, NULL);
   /*Decrypt the buffer*/
   for(i = 0; i< bufferSize; i+=16) {
