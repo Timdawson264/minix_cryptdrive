@@ -104,11 +104,7 @@ PRIVATE int do_vrdwt(message* mp)
   message m_dd; /*message for disk driver*/
   nr_req = mp->COUNT;	/* Length of I/O vector */
   position = mp->POSITION;
-  
-	if (mp->m_source < 0) {
-		/* Called by a task, no need to copy vector. */
-		iov = (iovec_t *) mp->ADDRESS;
-	} else {
+
 		/* Copy the vector from the caller to kernel space. */
 		if (nr_req > NR_IOREQS) nr_req = NR_IOREQS;
 			iovec_size = (phys_bytes) (nr_req * sizeof(iovec[0]));
@@ -117,13 +113,12 @@ PRIVATE int do_vrdwt(message* mp)
 				SELF, (vir_bytes) iovec, iovec_size))
 			panic("Crypt Drive","bad I/O vector by", s);
 		iov = iovec;
-	}
   
 	while(nr_req>0){
 		vir_bytes user_vir = iov->iov_addr; /*User program mem addresss*/
 		unsigned count = iov->iov_size; /* number of byted to copy */
 		
-		printf("CryptDrive: Size:%d , DST:%d , POS:%d, REQ: %d \n",count,user_vir,position,nr_req);
+		printf("CryptDrive: Size:%d , DST:%d , POS:%d, REQ: %d/%d \n",count, user_vir, position, nr_req, mp->COUNT);
 		
 		if(mp->m_type == DEV_GATHER){
 			m_dd.m_type=DEV_READ;
@@ -291,6 +286,7 @@ PUBLIC int main(void){
 	/* create nodes */
 	thispid=getpid();
 	printf("CryptDrive Started with pid %d\n",thispid);
+	printf("max number of requests in vector=%d\n",NR_IOREQS);
 	mapdriver(CD_MAJOR, thispid , STYLE_DEV);
 	driver_task();
 	unmapdriver(CD_MAJOR);		
