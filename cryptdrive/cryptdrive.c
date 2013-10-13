@@ -123,7 +123,7 @@ PRIVATE int do_vrdwt(message* mp)
 		vir_bytes user_vir = iov->iov_addr; /*User program mem addresss*/
 		unsigned count = iov->iov_size; /* number of byted to copy */
 		
-		printf("CryptDrive: Size:%d , DST:%d , POS:%d \n",count,user_vir,position);
+		printf("CryptDrive: Size:%d , DST:%d , POS:%d, REQ: %d \n",count,user_vir,position,nr_req);
 		
 		if(mp->m_type == DEV_GATHER){
 			m_dd.m_type=DEV_READ;

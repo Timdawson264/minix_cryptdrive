@@ -68,7 +68,7 @@
 
 /*  Typedefs  */
 
-typedef unsigned char   BYTE;
+typedef  unsigned char   BYTE;
 
 /*  The structure for key information */
 typedef struct {
