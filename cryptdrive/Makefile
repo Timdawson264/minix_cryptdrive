@@ -16,7 +16,7 @@ CFLAGS = -I$i
 LDFLAGS = -i
 LIBS = -lsys -lsysutil
 
-OBJ = cryptdrive.o
+OBJ = cryptdrive.o rijndael-alg-fst.o rijndael-api-fst.o
 
 # build local binary
 all build:	$(DRIVER)
