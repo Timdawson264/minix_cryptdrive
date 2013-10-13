@@ -1,7 +1,14 @@
 #include "../drivers.h"
 #include <sys/ioc_disk.h>
 #include <minix/com.h>
-#include <unistd.h>
+#include <unistd.h
+#include "../drivers.h"
+#include "../libdriver/driver.h"
+#include <sys/ioc_memory.h>
+#include "../../kernel/const.h"
+#include "../../kernel/config.h"
+#include "../../kernel/type.h"
+#include "assert.h"
 #include <stdio.h>
 
 #define CD_MAJOR 23
@@ -87,7 +94,7 @@ message *mp;		/* pointer to read or write message */
   int r;
   message m_dd; /*message for disk driver*/
   nr_req = mp->COUNT;	/* Length of I/O vector */
-  off_t position;
+  off_t position = mp->POSITION;
   
 	if (mp->m_source < 0) {
 		/* Called by a task, no need to copy vector. */
@@ -103,8 +110,6 @@ message *mp;		/* pointer to read or write message */
 		iov = iovec;
 	}
   
-	
-	position mp->POSITION;
 	while(nr_req>0){
 		vir_bytes user_vir = iov->iov_addr; /*User program mem addresss*/
 		unsigned count = iov->iov_size; /* number of byted to copy */
