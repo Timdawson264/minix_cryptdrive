@@ -8,8 +8,7 @@
 #include <sys/ioc_disk.h>
 #include <stdio.h>
 #include <assert.h>
-
-#include <unistd.h
+#include <unistd.h>
 
 #define CD_MAJOR 23
 #define BUF_LEN 4096
