@@ -197,7 +197,7 @@ PUBLIC void driver_task(void)
 		device_caller = mess.m_source;
         proc_nr = mess.PROC_NR;
         
-		printf("CD: message from %u,\n type %u\n",device_caller,proc_nr,mess.m_type);
+		printf("CD: message from %u, type %u\n",device_caller,proc_nr,mess.m_type);
 		/* Now carry out the work. */
 		
 		switch(mess.m_type) {
