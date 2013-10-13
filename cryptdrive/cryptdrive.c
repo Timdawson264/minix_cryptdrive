@@ -55,7 +55,7 @@ message *mp;			/* pointer to read or write message */
 		sys_vircopy(device_caller, D, mp->ADDRESS, SELF, D, buffer, mp->COUNT);
 		
 		user_vir = mp->ADDRESS;
-		mp->ADDRESS=buffer; /* use my buffer */
+		mp->ADDRESS= (vir_bytes) buffer; /* use my buffer */
 		mp->m_source=thispid;
 	
 		if(OK != sendrec(DRVR_PROC_NR, mp))
@@ -87,7 +87,8 @@ message *mp;		/* pointer to read or write message */
   int r;
   message m_dd; /*message for disk driver*/
   nr_req = mp->COUNT;	/* Length of I/O vector */
-
+  off_t position;
+  
 	if (mp->m_source < 0) {
 		/* Called by a task, no need to copy vector. */
 		iov = (iovec_t *) mp->ADDRESS;
@@ -98,11 +99,12 @@ message *mp;		/* pointer to read or write message */
 
 		if (OK != sys_datacopy(mp->m_source, (vir_bytes) mp->ADDRESS, 
 				SELF, (vir_bytes) iovec, iovec_size))
-			panic((*dp->dr_name)(),"bad I/O vector by", mp->m_source);
+			panic("Crypt Drive","bad I/O vector by", s);
 		iov = iovec;
 	}
   
-	off_t position = mp->POSITION;
+	
+	position mp->POSITION;
 	while(nr_req>0){
 		vir_bytes user_vir = iov->iov_addr; /*User program mem addresss*/
 		unsigned count = iov->iov_size; /* number of byted to copy */
