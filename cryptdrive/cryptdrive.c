@@ -1,5 +1,5 @@
-#include "../drivers.h"
 #include "rijndael-api-fst.h"
+#include "../drivers.h"
 #include <minix/const.h>
 #include <minix/minlib.h>
 #include <sys/ioc_memory.h>
