@@ -251,13 +251,13 @@ PUBLIC void driver_task(void)
 void encryptBuffer(char* buffer,int bufferSize){
   int i;
   char *currentBlock;
-  if(bytesRead % 16 != 0) {
+  if(bufferSize % 16 != 0) {
     /*Panic*/
     return;
   }
   /*Setting the key direction to Enpcrypt*/
-  keyInst.Direction = DIR_ENCRYPT;
-  makeKey(&keyInst, direction, 128,keyMaterial);
+  keyInst.direction = DIR_ENCRYPT;
+  makeKey(&keyInst, DIR_ENCRYPT, 128,keyMaterial);
   cipherInit(&cipherInst, MODE_ECB, NULL);
   /*Encrypt the buffer*/
   for(i = 0; i< bufferSize; i+=16) {
@@ -274,13 +274,13 @@ void encryptBuffer(char* buffer,int bufferSize){
 void decryptBuffer(char* buffer,int bufferSize){
   int i;
   char *currentBlock;
-  if(bytesRead % 16 != 0) {
+  if(bufferSize % 16 != 0) {
     /*Panic*/
     return;
   }
   /*Setting the key direction to Depcrypt*/
-  keyInst.Direction = DIR_DECRYPT;
-  makeKey(&keyInst, direction, 128,keyMaterial);
+  keyInst.direction = DIR_DECRYPT;
+  makeKey(&keyInst, DIR_DECRYPT, 128,keyMaterial);
   cipherInit(&cipherInst, MODE_ECB, NULL);
   /*Decrypt the buffer*/
   for(i = 0; i< bufferSize; i+=16) {
