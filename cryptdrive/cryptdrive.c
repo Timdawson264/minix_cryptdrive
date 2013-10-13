@@ -22,8 +22,8 @@ char * buffer[BUF_LEN];
 /*===========================================================================*
  *				do_rdwt					     *
  *===========================================================================*/
-PUBLIC int do_rdwt(mp)
-message *mp;			/* pointer to read or write message */
+PUBLIC int do_rdwt(message *mp)
+/* mp - pointer to read or write message */
 {
 	/* Carry out a single read or write request. */
 	iovec_t iovec1;
@@ -80,8 +80,8 @@ message *mp;			/* pointer to read or write message */
 /*==========================================================================*
  *				do_vrdwt				    *
  *==========================================================================*/
-PRIVATE int do_vrdwt(mp)
-message *mp;		/* pointer to read or write message */
+PRIVATE int do_vrdwt(message* mp)
+ /* mp - pointer to read or write message */
 {
 /* Carry out an device read or write to/from a vector of user addresses.
  * The "user addresses" are assumed to be safe, i.e. FS transferring to/from
