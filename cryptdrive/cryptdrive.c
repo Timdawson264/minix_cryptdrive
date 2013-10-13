@@ -44,7 +44,7 @@ message *mp;			/* pointer to read or write message */
 			panic("CryptDrive","do_rd messaging failed",s);
 		
 		/* decrypt here  - this line here */
-		sys_vircopy(SELF, D, buffer, device_caller, D, caller_buf, mp->COUNT)
+		sys_vircopy(SELF, D, buffer, device_caller, D, caller_buf, mp->COUNT);
 		
 		mp->m_source=thispid;
 		if(OK != send(device_caller, mp))
@@ -53,7 +53,7 @@ message *mp;			/* pointer to read or write message */
 	}
 	if(opcode == DEV_WRITE){
 		/*from caller to here*/
-		sys_vircopy(device_caller, D, mp->ADDRESS, SELF, D, buffer, mp->COUNT)
+		sys_vircopy(device_caller, D, mp->ADDRESS, SELF, D, buffer, mp->COUNT);
 		
 		caller_buf = mp->ADDRESS;
 		mp->ADDRESS=buffer; /* use my buffer */
