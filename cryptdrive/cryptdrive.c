@@ -1,5 +1,22 @@
 #include "rijndael-api-fst.h"
 #include "../drivers.h"
+
+#include <minix/config.h>	/* MUST be first */
+#include <ansi.h>		/* MUST be second */
+#include <minix/type.h>
+#include <minix/ipc.h>
+#include <minix/com.h>
+#include <minix/callnr.h>
+#include <sys/types.h>
+#include <minix/const.h>
+#include <minix/syslib.h>
+#include <minix/sysutil.h>
+#include <string.h>
+#include <limits.h>
+#include <stddef.h>
+#include <errno.h>
+#include <minix/partition.h>
+#include <minix/u64.h>
 #include <minix/const.h>
 #include <minix/minlib.h>
 #include <sys/ioc_memory.h>
@@ -7,12 +24,15 @@
 #include <stdio.h>
 #include <assert.h>
 #include <unistd.h>
-
-#include <string.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <stddef.h>
+
+#define _POSIX_SOURCE      1	/* tell headers to include POSIX stuff */
+#define _MINIX             1	/* tell headers to include MINIX stuff */
+#define _SYSTEM		   1	/* get negative error number in <errno.h> */
+
 
 
 #define CD_MAJOR 23
