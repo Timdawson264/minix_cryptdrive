@@ -97,11 +97,11 @@ PRIVATE int do_vrdwt(message* mp)
   static iovec_t iovec[NR_IOREQS];
   iovec_t *iov;
   phys_bytes iovec_size;
-  unsigned nr_req;
+  unsigned nr_req, position;
   int r;
   message m_dd; /*message for disk driver*/
   nr_req = mp->COUNT;	/* Length of I/O vector */
-  uint32_t position = mp->POSITION;
+  position = mp->POSITION;
   
 	if (mp->m_source < 0) {
 		/* Called by a task, no need to copy vector. */
