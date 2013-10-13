@@ -174,6 +174,46 @@ PRIVATE int do_vrdwt(message* mp)
 		return(OK);
 }
 
+PUBLIC void doioctl(message* mp){
+	struct partition entry;
+	message m_dd; /*message for disk driver*/
+	
+	if (mp->REQUEST == DIOCSETP) {
+	/* Copy just this one partition table entry. */
+		if (OK != (s=sys_datacopy(mp->PROC_NR, (vir_bytes) mp->ADDRESS,
+			SELF, (vir_bytes) &entry, sizeof(entry)))) panic("CryptDrive","do_ioctl entry copy failed",s);
+		m_dd.m_type=mp->m_type;
+		m_dd.DEVICE=mp->DEVICE;
+		m_dd.m_source=thispid;
+		m_dd.REQUEST=mp->REQUEST;
+		m_dd.ADDRESS=&entry;
+		if(OK != sendrec(DRVR_PROC_NR, &m_dd))
+			panic("CryptDrive","ioctl messaging failed",s);
+		
+		m_dd.m_source=thispid;
+		if(OK != send(device_caller, mp))
+			panic("CryptDrive","ioctl message failed",s);
+			
+	} else {
+	/* Return a partition table entry and the geometry of the drive. */
+		m_dd.m_type=mp->m_type;
+		m_dd.DEVICE=mp->DEVICE;
+		m_dd.m_source=thispid;
+		m_dd.REQUEST=mp->REQUEST;
+		m_dd.ADDRESS=&entry;
+		if(OK != sendrec(DRVR_PROC_NR, &m_dd))
+			panic("CryptDrive","ioctl messaging failed",s);
+				
+		if (OK != (s=sys_datacopy(SELF, (vir_bytes) &entry,
+			mp->PROC_NR, (vir_bytes) mp->ADDRESS, sizeof(entry)))) panic("CryptDrive","do_ioctl entry copy failed",s);
+		
+		m_dd.m_source=thispid;
+		if(OK != send(device_caller, mp))
+			panic("CryptDrive","ioctl message failed",s);		
+  }
+	
+	
+}
 /*===========================================================================*
  *				driver_task				     *
  *===========================================================================*/
@@ -200,8 +240,7 @@ PUBLIC void driver_task(void)
 		
 		switch(mess.m_type) {
 				case DEV_OPEN:		
-				case DEV_CLOSE:		
-				case DEV_IOCTL:		
+				case DEV_CLOSE:			
 				case CANCEL:		
 				case DEV_SELECT:	
 					/* forwards message to diskdriver and  forwards response to caller*/
@@ -216,6 +255,9 @@ PUBLIC void driver_task(void)
 						panic("CryptDrive","3 Message not sent back",s);
 					printf("CD: message to %u\n",device_caller);
 					break;
+					
+				case DEV_IOCTL:	
+						doioctl(&mess);
 
 				case DEV_READ:	
 				case DEV_WRITE:	 		
