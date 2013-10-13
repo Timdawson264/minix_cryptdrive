@@ -173,7 +173,7 @@ PRIVATE int do_vrdwt(message* mp)
 		mp->REP_STATUS = OK;	
 		send(device_caller, mp);
 		
-		return(OK)
+		return(OK);
 }
 
 /*===========================================================================*
