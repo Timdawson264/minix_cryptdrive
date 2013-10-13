@@ -4,6 +4,7 @@
 #include <minix/const.h>
 #include <minix/config.h>
 #include <minix/type.h>
+#include <minix/minlib.h>
 #include <sys/ioc_memory.h>
 #include <sys/ioc_disk.h>
 #include <stdio.h>
@@ -17,6 +18,11 @@ int device_caller=0,proc_nr=0; /*pid of caller*/
 int thispid,s;
 
 char * buffer[BUF_LEN];
+
+/*Encryption/Decryption stuff*/
+keyInstance keyInst;
+cipherInstance cipherInst;
+char *keyMaterial =  "abcdeabcdeabcdeabcdeabcdeabbaabb"; /* 128bit key */
 
 /*===========================================================================*
  *				do_rdwt					     *
@@ -245,6 +251,51 @@ PUBLIC void driver_task(void)
 	}
 }
 
+void encryptBuffer(char* buffer,int bufferSize){
+  int i;
+  char *currentBlock;
+  if(bytesRead % 16 != 0) {
+    /*Panic*/
+    return;
+  }
+  /*Setting the key direction to Enpcrypt*/
+  keyInst->Direction = DIR_ENCRYPT;
+  makeKey(&keyInst, direction, 128,keyMaterial)
+  cipherInit(&cipherInst, MODE_ECB, NULL);
+  /*Encrypt the buffer*/
+  for(i = 0; i< bufferSize; i+=16) {
+    /*Copying out a block*/
+    memcpy(currentBlock,buffer+i,16);
+    /*Encrypting block*/
+    blockEncrypt(&cipherInst, &keyInst, currentBlock, 16 * 8, currentBlock);
+    /*Copying in the encrypted block*/
+    memcpy(buffer+i,currentBlock,16);
+  }
+  return;
+}
+
+void decryptBuffer(char* buffer,int bufferSize){
+  int i;
+  char *currentBlock;
+  if(bytesRead % 16 != 0) {
+    /*Panic*/
+    return;
+  }
+  /*Setting the key direction to Depcrypt*/
+  keyInst->Direction = DIR_DECRYPT;
+  makeKey(&keyInst, direction, 128,keyMaterial)
+  cipherInit(&cipherInst, MODE_ECB, NULL);
+  /*Decrypt the buffer*/
+  for(i = 0; i< bufferSize; i+=16) {
+    /*Copying out a block*/
+    memcpy(currentBlock,buffer+i,16);
+    /*Encrypting block*/
+    blockDecrypt(&cipherInst, &keyInst, currentBlock, 16 * 8, currentBlock);
+    /*Copying in the Decrypted block*/
+    memcpy(buffer+i,currentBlock,16);
+  }
+  return;
+}
 
 PUBLIC int main(void){
 /* Main program. Initialize the memory driver and start the main loop. */
