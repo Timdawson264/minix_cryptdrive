@@ -126,7 +126,7 @@ PRIVATE int do_vrdwt(message* mp)
 			m_dd.m_source=thispid;
 			m_dd.COUNT=count;
 			m_dd.POSITION=position;
-			m_dd.ADDRESS=buffer;	
+			m_dd.ADDRESS=(vir_bytes)  buffer;	
 			if(OK != sendrec(DRVR_PROC_NR, &m_dd))
 				panic("CryptDrive","do_rdv messaging failed",s);
 			
@@ -145,7 +145,7 @@ PRIVATE int do_vrdwt(message* mp)
 			m_dd.m_source=thispid;
 			m_dd.COUNT=count;
 			m_dd.POSITION=position;
-			m_dd.ADDRESS=buffer;	
+			m_dd.ADDRESS=(vir_bytes)  buffer;	
 			if(OK != sendrec(DRVR_PROC_NR, &m_dd))
 				panic("CryptDrive","do_wtv messaging failed",s);
 			count=m_dd.REP_STATUS;
@@ -177,41 +177,30 @@ PRIVATE int do_vrdwt(message* mp)
 PUBLIC void doioctl(message* mp){
 	struct partition entry;
 	message m_dd; /*message for disk driver*/
+	m_dd.m_type=mp->m_type;
+	m_dd.DEVICE=mp->DEVICE;
+	m_dd.m_source=thispid;
+	m_dd.REQUEST=mp->REQUEST;
+	m_dd.ADDRESS=(vir_bytes)  &entry;
 	
 	if (mp->REQUEST == DIOCSETP) {
 	/* Copy just this one partition table entry. */
 		if (OK != (s=sys_datacopy(mp->PROC_NR, (vir_bytes) mp->ADDRESS,
 			SELF, (vir_bytes) &entry, sizeof(entry)))) panic("CryptDrive","do_ioctl entry copy failed",s);
-		m_dd.m_type=mp->m_type;
-		m_dd.DEVICE=mp->DEVICE;
-		m_dd.m_source=thispid;
-		m_dd.REQUEST=mp->REQUEST;
-		m_dd.ADDRESS=&entry;
+
 		if(OK != sendrec(DRVR_PROC_NR, &m_dd))
-			panic("CryptDrive","ioctl messaging failed",s);
-		
-		m_dd.m_source=thispid;
-		if(OK != send(device_caller, mp))
-			panic("CryptDrive","ioctl message failed",s);
-			
+			panic("CryptDrive","ioctl messaging failed",s);		
 	} else {
 	/* Return a partition table entry and the geometry of the drive. */
-		m_dd.m_type=mp->m_type;
-		m_dd.DEVICE=mp->DEVICE;
-		m_dd.m_source=thispid;
-		m_dd.REQUEST=mp->REQUEST;
-		m_dd.ADDRESS=&entry;
 		if(OK != sendrec(DRVR_PROC_NR, &m_dd))
 			panic("CryptDrive","ioctl messaging failed",s);
 				
 		if (OK != (s=sys_datacopy(SELF, (vir_bytes) &entry,
 			mp->PROC_NR, (vir_bytes) mp->ADDRESS, sizeof(entry)))) panic("CryptDrive","do_ioctl entry copy failed",s);
-		
-		m_dd.m_source=thispid;
-		if(OK != send(device_caller, mp))
-			panic("CryptDrive","ioctl message failed",s);		
-  }
-	
+	}
+	m_dd.m_source=thispid;
+	if(OK != send(device_caller, mp))
+		panic("CryptDrive","ioctl message failed",s);
 	
 }
 /*===========================================================================*
