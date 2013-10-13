@@ -1,15 +1,15 @@
 #include "../drivers.h"
-#include <sys/ioc_disk.h>
-#include <minix/com.h>
-#include <unistd.h
-#include "../drivers.h"
 #include "../libdriver/driver.h"
+#include <minix/com.h>
+#include <minix/const.h>
+#include <minix/config.h>
+#include <minix/type.h>
 #include <sys/ioc_memory.h>
-#include "../../kernel/const.h"
-#include "../../kernel/config.h"
-#include "../../kernel/type.h"
-#include "assert.h"
+#include <sys/ioc_disk.h>
 #include <stdio.h>
+#include <assert.h>
+
+#include <unistd.h
 
 #define CD_MAJOR 23
 #define BUF_LEN 4096
