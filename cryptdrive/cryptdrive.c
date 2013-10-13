@@ -1,15 +1,18 @@
-#include "rijndael-api-fst.h"
 #include "../drivers.h"
-#include <minix/com.h>
+#include "rijndael-api-fst.h"
 #include <minix/const.h>
-#include <minix/config.h>
-#include <minix/type.h>
 #include <minix/minlib.h>
 #include <sys/ioc_memory.h>
 #include <sys/ioc_disk.h>
 #include <stdio.h>
 #include <assert.h>
 #include <unistd.h>
+
+#include <string.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <stddef.h>
 
 
 #define CD_MAJOR 23
@@ -128,7 +131,7 @@ PRIVATE int do_vrdwt(message* mp)
 			m_dd.m_source=thispid;
 			m_dd.COUNT=count;
 			m_dd.POSITION=position;
-			m_dd.ADDRESS=user_vir;	
+			m_dd.ADDRESS=buffer;	
 			if(OK != sendrec(DRVR_PROC_NR, &m_dd))
 				panic("CryptDrive","do_rdv messaging failed",s);
 			
@@ -147,7 +150,7 @@ PRIVATE int do_vrdwt(message* mp)
 			m_dd.m_source=thispid;
 			m_dd.COUNT=count;
 			m_dd.POSITION=position;
-			m_dd.ADDRESS=user_vir;	
+			m_dd.ADDRESS=buffer;	
 			if(OK != sendrec(DRVR_PROC_NR, &m_dd))
 				panic("CryptDrive","do_wtv messaging failed",s);
 			count=m_dd.REP_STATUS;
