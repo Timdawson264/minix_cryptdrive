@@ -101,7 +101,7 @@ PRIVATE int do_vrdwt(message* mp)
   int r;
   message m_dd; /*message for disk driver*/
   nr_req = mp->COUNT;	/* Length of I/O vector */
-  unsigned position = mp->POSITION;
+  uint32_t position = mp->POSITION;
   
 	if (mp->m_source < 0) {
 		/* Called by a task, no need to copy vector. */
