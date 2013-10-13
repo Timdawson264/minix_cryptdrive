@@ -15,7 +15,7 @@ char * buffer[BUF_LEN];
 /*===========================================================================*
  *				do_rdwt					     *
  *===========================================================================*/
-PRIVATE int do_rdwt(mp)
+PUBLIC int do_rdwt(mp)
 message *mp;			/* pointer to read or write message */
 {
 	/* Carry out a single read or write request. */
@@ -35,8 +35,8 @@ message *mp;			/* pointer to read or write message */
 		
 	if(opcode == DEV_READ){
 		/*from here to caller*/
-		vir_bytes user_vir = mp->ADDRESS;
-		mp->ADDRESS= (vir_bytes) buffer; /* use my buffer */
+		vir_bytes user_vir = (vir_bytes) mp->ADDRESS;
+		mp->ADDRESS = (vir_bytes) buffer; /* use my buffer */
 		mp->m_source=thispid;
 	
 		if(OK != sendrec(DRVR_PROC_NR, mp))
@@ -110,7 +110,6 @@ message *mp;		/* pointer to read or write message */
 		printf("CryptDrive: Size:%d , DST:%d , POS:%d \n",count,user_vir,position);
 		
 		if(mp->m_type == DEV_GATHER){
-			/*from here to caller*/
 			m_dd.m_type=DEV_READ;
 			m_dd.DEVICE=mp->DEVICE;
 			m_dd.m_source=thispid;
@@ -121,6 +120,7 @@ message *mp;		/* pointer to read or write message */
 				panic("CryptDrive","do_rdv messaging failed",s);
 			
 			/* decrypt here  - this line here */
+			/*from here to caller*/
 			sys_vircopy(SELF, D, buffer, device_caller, D, user_vir, m_dd.COUNT);
 			
 		}
@@ -152,11 +152,11 @@ message *mp;		/* pointer to read or write message */
 		mess.REP_STATUS = OK;	
 		send(device_caller, &mess);
 
-  /* Copy the I/O vector back to the caller. */
-  if (mp->m_source >= 0) {
-    sys_datacopy(SELF, (vir_bytes) iovec, 
-    	mp->m_source, (vir_bytes) mp->ADDRESS, iovec_size);
-  }
+	/* Copy the I/O vector back to the caller. */
+	if (mp->m_source >= 0) {
+		sys_datacopy(SELF, (vir_bytes) iovec, 
+			mp->m_source, (vir_bytes) mp->ADDRESS, iovec_size);
+	}
   
   
   
