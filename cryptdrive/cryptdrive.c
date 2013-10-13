@@ -197,20 +197,10 @@ PUBLIC void driver_task(void)
 		device_caller = mess.m_source;
         proc_nr = mess.PROC_NR;
         
-		printf("CD: message from %u,\n",device_caller,proc_nr);
+		printf("CD: message from %u,\n type %u",device_caller,proc_nr,mess.m_type);
 		/* Now carry out the work. */
 		
-		if(DRVR_PROC_NR==mess.m_source){
-			/*from disk driver to other*/
-			mess.m_source = thispid; /* make it from here */
-			if(OK != send(device_caller, &mess))
-				panic("CryptDrive","1 Message not sent back",s);
-				printf("CD: message to %u\n",device_caller);
-		}else{
-			/* prob from fs */
-			/*from other to diskdriver*/
-			
-			switch(mess.m_type) {
+		switch(mess.m_type) {
 				case DEV_OPEN:		
 				case DEV_CLOSE:		
 				case DEV_IOCTL:		
@@ -219,31 +209,30 @@ PUBLIC void driver_task(void)
 					/* forwards message to diskdriver and  forwards response to caller*/
 					device_caller = mess.m_source;
 					mess.m_source = thispid; /*make this the source*/
-					if(OK != send(DRVR_PROC_NR, &mess))
-						panic("CryptDrive","2 Message not sent back",s);
+					if(OK != sendrec(DRVR_PROC_NR, &mess))
+						panic("CryptcDrive","2 Message not sent back",s);
 					printf("CD: waiting for diskdriver\n");	
 					
-					if(receive(DRVR_PROC_NR, &mess) != OK) continue;
-					/*from disk driver to other*/
 					mess.m_source = thispid; /*make this the source*/
 					if(OK != send(device_caller, &mess))
 						panic("CryptDrive","3 Message not sent back",s);
 					printf("CD: message to %u\n",device_caller);
-
+					break;
 
 				case DEV_READ:	
 				case DEV_WRITE:	 		
 						do_rdwt(&mess);
+						break;
 				case DEV_GATHER: 
 				case DEV_SCATTER:
 						do_vrdwt(&mess);				
-
+						break;
 
 				case HARD_INT:
 				case SYS_SIG:
-				case SYN_ALARM:	continue;	/* don't reply */
+				case SYN_ALARM:	break;	/* don't reply */
 				
-			}
+			
 		}
 	}
 }
