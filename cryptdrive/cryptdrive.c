@@ -1,3 +1,4 @@
+#include "rijndael-api-fst.h"
 #include "../drivers.h"
 #include "../libdriver/driver.h"
 #include <minix/com.h>
@@ -10,6 +11,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <unistd.h>
+
 
 #define CD_MAJOR 23
 #define BUF_LEN 4096
@@ -238,7 +240,6 @@ PUBLIC void driver_task(void)
 						do_rdwt(&mess);
 				case DEV_GATHER: 
 				case DEV_SCATTER:
-						panic("CryptDrive","Vectors not supported yet :P",s);
 						do_vrdwt(&mess);				
 
 
