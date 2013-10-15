@@ -55,10 +55,8 @@ PUBLIC int do_rdwt(message *mp)
 /* mp - pointer to read or write message */
 {
 	/* Carry out a single read or write request. */
-	iovec_t iovec1;
 	int r, opcode;
 	phys_bytes phys_addr;
-	vir_bytes user_vir;
 	/* Disk address?  Address and length of the user buffer? */
 	if (mp->COUNT < 0) return(EINVAL);
 
@@ -71,15 +69,15 @@ PUBLIC int do_rdwt(message *mp)
 		
 	if(opcode == DEV_READ){
 		/*from here to caller*/
-		user_vir = (vir_bytes) mp->ADDRESS;
-		mp->ADDRESS = (vir_bytes) buffer; /* use my buffer */
+		vir_bytes user_vir = (vir_bytes) mp->ADDRESS;
+		mp->ADDRESS = (vir_bytes) buf; /* use my buffer */
 		mp->m_source=thispid;
 	
 		if(OK != sendrec(DRVR_PROC_NR, mp))
 			panic("CryptDrive","do_rd messaging failed",s);
 		
 		/* decrypt here  - this line here */
-		sys_vircopy(SELF, D, buffer, device_caller, D, user_vir, mp->COUNT);
+		sys_vircopy(SELF, D, buffer, proc_nr, D, user_vir, mp->COUNT);
 		
 		mp->m_source=thispid;
 		if(OK != send(device_caller, mp))
@@ -88,7 +86,7 @@ PUBLIC int do_rdwt(message *mp)
 	}
 	if(opcode == DEV_WRITE){
 		/*from caller to here*/
-		sys_vircopy(device_caller, D, mp->ADDRESS, SELF, D, buffer, mp->COUNT);
+		sys_vircopy(proc_nr, D, mp->ADDRESS, SELF, D, buffer, mp->COUNT);
 		
 		user_vir = mp->ADDRESS;
 		mp->ADDRESS= (vir_bytes) buffer; /* use my buffer */
@@ -152,12 +150,12 @@ PRIVATE int do_vrdwt(message* mp)
 			
 			/* decrypt here  - this line here */
 			/*from here to caller*/
-			sys_vircopy(SELF, D, buffer, device_caller, D, user_vir, m_dd.COUNT);
+			sys_vircopy(SELF, D, buffer, proc_nr, D, user_vir, m_dd.COUNT);
 			
 		}
 		if(mp->m_type == DEV_SCATTER){
 			/*from caller to here*/
-			sys_vircopy(device_caller, D, user_vir, SELF, D, buffer, count);
+			sys_vircopy(proc_nr, D, user_vir, SELF, D, buffer, count);
 			/*ENCYPT Here - this line no more no less*/
 			
 			m_dd.m_type=DEV_WRITE;
@@ -176,22 +174,21 @@ PRIVATE int do_vrdwt(message* mp)
         iov->iov_addr += count;
         if ((iov->iov_size -= count) == 0) { iov++; nr_req--; } /* vector done; next request */
 	}
-
-
-		/* Copy the I/O vector back to the caller. */
-		if (mp->m_source >= 0) {
-			sys_datacopy(SELF, (vir_bytes) iovec, 
-				mp->m_source, (vir_bytes) mp->ADDRESS, iovec_size);
-		}
 	
-		mp->m_type = TASK_REPLY;
-		mp->REP_PROC_NR = proc_nr;
-		mp->m_source=thispid;
-		/* Status is ok */
-		mp->REP_STATUS = OK;	
-		send(device_caller, mp);
-		
-		return(OK);
+	/* Copy the I/O vector back to the caller. */
+	if (mp->m_source >= 0) {
+		sys_datacopy(SELF, (vir_bytes) iovec, 
+			mp->m_source, (vir_bytes) mp->ADDRESS, iovec_size);
+	}
+
+	mp->m_type = TASK_REPLY;
+	mp->REP_PROC_NR = proc_nr;
+	mp->m_source=thispid;
+	/* Status is ok */
+	mp->REP_STATUS = OK;	
+	send(device_caller, mp);
+	
+	return(OK);
 }
 
 PUBLIC void doioctl(message* mp){
@@ -253,7 +250,6 @@ PUBLIC void driver_task(void)
 				case CANCEL:		
 				case DEV_SELECT:	
 					/* forwards message to diskdriver and  forwards response to caller*/
-					device_caller = mess.m_source;
 					mess.m_source = thispid; /*make this the source*/
 					if(OK != sendrec(DRVR_PROC_NR, &mess))
 						panic("CryptcDrive","2 Message not sent back",s);
